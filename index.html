@@ -22,10 +22,12 @@
 
         body {
             font-family: 'Prompt', sans-serif;
-            /* เปลี่ยนพื้นหลังเป็นโทนเย็นสว่าง (Light / Cool tones) */
-            background: linear-gradient(135deg, #e0f2fe, #f0f9ff, #bae6fd);
+            background-image: url('GIF พื้นหลัง.gif');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #e0f2fe; /* Fallback color */
             color: #1e293b;
-            /* เปลี่ยนสีข้อความหลักเป็นสีเข้ม */
             min-height: 100dvh;
             overflow-x: hidden;
         }
@@ -109,8 +111,12 @@
             </button>
         </div>
         <div class="flex flex-col gap-1">
-            <label for="bg-volume" class="text-xs text-slate-500">ระดับเสียง</label>
-            <input type="range" id="bg-volume" min="0" max="1" step="0.01" value="0.3" class="w-full accent-indigo-600" onchange="updateVolume(this.value)" oninput="updateVolume(this.value)">
+            <label for="bg-volume" class="text-xs text-slate-500">ระดับเสียงพื้นหลัง</label>
+            <input type="range" id="bg-volume" min="0" max="1" step="0.01" value="0.3" class="w-full accent-indigo-600" onchange="updateBgVolume(this.value)" oninput="updateBgVolume(this.value)">
+        </div>
+        <div class="flex flex-col gap-1 mt-1">
+            <label for="sfx-volume" class="text-xs text-slate-500">ระดับเสียงเอฟเฟกต์</label>
+            <input type="range" id="sfx-volume" min="0" max="1" step="0.01" value="0.3" class="w-full accent-indigo-600" onchange="updateSfxVolume(this.value)" oninput="updateSfxVolume(this.value)">
         </div>
     </div>
 
@@ -129,18 +135,19 @@
             class="max-w-full max-h-[90dvh] rounded-2xl shadow-2xl object-contain scale-95 transition-transform duration-300 border-[3px] border-indigo-400">
     </div>
 
-    <header class="text-center w-full shrink-0 z-10">
+    <header class="text-center w-full shrink-0 z-10 flex flex-col items-center mt-2">
         <h1 class="text-2xl md:text-3xl font-bold mb-1 text-indigo-900 drop-shadow-sm">✨ ดูดวงไพ่โอราเคิล ✨</h1>
-        <p class="text-slate-600 text-xs md:text-sm font-medium">อธิษฐานจิต แล้วแตะเพื่อเปิดไพ่ทีละใบ</p>
+        <span class="text-xs text-indigo-600 font-semibold bg-white/70 backdrop-blur-sm px-3 py-0.5 rounded-full border border-indigo-100 shadow-sm mb-1">Art by Paradon</span>
+        <p class="text-slate-600 text-xs md:text-sm font-medium mt-1">อธิษฐานจิต แล้วแตะเพื่อเปิดไพ่ทีละใบ</p>
     </header>
 
-    <main id="main-scroll" class="flex-grow flex flex-col w-full max-w-3xl py-4 overflow-y-auto relative">
+    <main id="main-scroll" class="flex-grow flex flex-col w-full max-w-3xl py-2 sm:py-4 overflow-hidden relative">
 
-        <div id="result-area" class="hidden flex-col items-center w-full justify-start pb-6">
+        <div id="result-area" class="hidden flex-col items-center w-full justify-start h-full overflow-hidden">
 
             <!-- พื้นที่สำหรับวางไพ่ (Mat) -->
             <div id="cards-container"
-                class="card-mat flex flex-row justify-center items-center gap-2 xs:gap-3 sm:gap-6 mb-6 sticky top-0 p-4 sm:p-6 rounded-2xl z-20 w-full max-w-[500px]">
+                class="card-mat flex flex-row justify-center items-center gap-2 xs:gap-3 sm:gap-6 mb-2 p-3 sm:p-6 rounded-2xl w-full max-w-[500px] shrink-0 relative z-10 shadow-lg border border-indigo-200/50">
 
                 <!-- เลเยอร์สีดำบางๆ เคลือบภาพพื้นหลังไม่ให้แย่งซีนไพ่ -->
                 <div class="absolute inset-0 bg-black/20 rounded-xl pointer-events-none"></div>
@@ -179,7 +186,12 @@
                 </div>
             </div>
 
-            <div id="meanings-container" class="w-full flex flex-col gap-4 px-2 mt-2">
+            <!-- กล่องสำหรับข้อความอธิบายการ์ด -->
+            <div id="meanings-wrapper" class="w-full flex-grow flex flex-col overflow-hidden bg-white/40 backdrop-blur-md border border-white/60 rounded-2xl shadow-inner relative">
+                <div id="meanings-container" class="w-full flex flex-col gap-4 p-3 sm:p-5 overflow-y-auto h-full scroll-smooth pb-10">
+                </div>
+                <!-- Fade effect -->
+                <div class="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white/30 to-transparent pointer-events-none"></div>
             </div>
         </div>
 
@@ -261,8 +273,11 @@
             }
         }
 
-        function updateVolume(val) {
+        function updateBgVolume(val) {
             bgMusic.volume = val;
+        }
+
+        function updateSfxVolume(val) {
             audioEnter.volume = val;
             audioDraw.volume = val;
             audioEnlarge.volume = val;
@@ -358,7 +373,10 @@
             }
         }
 
+        let isAnimating = false;
+
         function drawSingleCard() {
+            if (isAnimating) return;
             if (availableDeck.length === 0 && currentSpread.length === 3) return;
 
             playSound(audioDraw);
@@ -380,40 +398,98 @@
 
                 setupEmptySlots();
                 document.getElementById('meanings-container').innerHTML = '';
+                void resultArea.offsetWidth; // Force layout reflow
             }
+
+            isAnimating = true;
 
             const randomIndex = Math.floor(Math.random() * availableDeck.length);
             const drawnCard = availableDeck.splice(randomIndex, 1)[0];
             const slotIndex = currentSpread.length;
             currentSpread.push(drawnCard);
+            
+            updateRemainingCount();
 
-            const slot = document.getElementById(`slot-${slotIndex}`);
-            slot.className = `card-reveal relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] rounded-xl overflow-hidden shadow-[0_5px_15px_rgba(0,0,0,0.6)] bg-gray-800 border-[2px] border-indigo-200 shrink-0 cursor-pointer hover:scale-105 hover:-translate-y-1 transition-all duration-200`;
+            const deckEl = document.getElementById('deck-display');
+            const slotEl = document.getElementById(`slot-${slotIndex}`);
+            const deckRect = deckEl.getBoundingClientRect();
 
-            slot.innerHTML = `
-                <img src="${drawnCard.imageUrl}" alt="ไพ่ ${slotIndex + 1}" class="w-full h-full object-cover" 
-                     onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+${slotIndex + 1}&font=prompt';"
-                     onclick="openModal('${drawnCard.imageUrl}', ${slotIndex + 1})">
-            `;
+            const flyingCard = document.createElement('div');
+            flyingCard.id = 'flying-card';
+            flyingCard.className = 'fixed z-[100] rounded-xl overflow-hidden shadow-2xl pointer-events-none';
+            flyingCard.style.left = deckRect.left + 'px';
+            flyingCard.style.top = deckRect.top + 'px';
+            flyingCard.style.width = deckRect.width + 'px';
+            flyingCard.style.height = deckRect.height + 'px';
 
-            const meaningsContainer = document.getElementById('meanings-container');
-            meaningsContainer.innerHTML += `
-                <div class="text-left bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-sky-100 w-full shadow-lg shadow-sky-900/5 card-reveal">
-                    <span class="inline-block px-3 py-1 bg-sky-100 text-sky-800 text-xs rounded-full mb-3 font-semibold border border-sky-200">
-                        ${spreadTitles[slotIndex]}
-                    </span>
-                    <h2 class="text-lg font-bold text-slate-800 mb-1.5">${drawnCard.title}</h2>
-                    <p class="text-slate-600 leading-relaxed whitespace-pre-line text-sm font-medium">${drawnCard.meaning}</p>
-                </div>
-            `;
+            const cardImg = document.createElement('img');
+            cardImg.src = '37.jpg';
+            cardImg.className = 'w-full h-full object-cover';
+            flyingCard.appendChild(cardImg);
+            document.body.appendChild(flyingCard);
+
+            const centerWidth = Math.min(window.innerWidth * 0.6, 250);
+            const centerHeight = centerWidth * 1.5;
+            const centerLeft = (window.innerWidth - centerWidth) / 2;
+            const centerTop = (window.innerHeight - centerHeight) / 2;
+
+            const anim1 = flyingCard.animate([
+                { left: deckRect.left + 'px', top: deckRect.top + 'px', width: deckRect.width + 'px', height: deckRect.height + 'px', transform: 'rotateY(0deg)' },
+                { left: centerLeft + 'px', top: centerTop + 'px', width: centerWidth + 'px', height: centerHeight + 'px', transform: 'rotateY(90deg)', offset: 0.5 },
+                { left: centerLeft + 'px', top: centerTop + 'px', width: centerWidth + 'px', height: centerHeight + 'px', transform: 'rotateY(0deg)' }
+            ], {
+                duration: 800,
+                easing: 'ease-in-out',
+                fill: 'forwards'
+            });
 
             setTimeout(() => {
-                const mainEl = document.getElementById('main-scroll');
-                mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' });
-            }, 100);
+                cardImg.src = drawnCard.imageUrl;
+            }, 400);
 
-            updateRemainingCount();
-            updateNextButtonState();
+            anim1.onfinish = () => {
+                setTimeout(() => {
+                    const slotRect = slotEl.getBoundingClientRect();
+                    const anim2 = flyingCard.animate([
+                        { left: centerLeft + 'px', top: centerTop + 'px', width: centerWidth + 'px', height: centerHeight + 'px' },
+                        { left: slotRect.left + 'px', top: slotRect.top + 'px', width: slotRect.width + 'px', height: slotRect.height + 'px' }
+                    ], {
+                        duration: 500,
+                        easing: 'ease-in-out',
+                        fill: 'forwards'
+                    });
+
+                    anim2.onfinish = () => {
+                        flyingCard.remove();
+                        
+                        slotEl.className = `relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] rounded-xl overflow-hidden shadow-[0_5px_15px_rgba(0,0,0,0.6)] bg-gray-800 border-[2px] border-indigo-200 shrink-0 cursor-pointer hover:scale-105 hover:-translate-y-1 transition-all duration-200`;
+                        slotEl.innerHTML = `
+                            <img src="${drawnCard.imageUrl}" alt="ไพ่ ${slotIndex + 1}" class="w-full h-full object-cover" 
+                                 onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+${slotIndex + 1}&font=prompt';"
+                                 onclick="openModal('${drawnCard.imageUrl}', ${slotIndex + 1})">
+                        `;
+
+                        const meaningsContainer = document.getElementById('meanings-container');
+                        meaningsContainer.innerHTML += `
+                            <div class="text-left bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-sky-100 w-full shadow-lg shadow-sky-900/5 card-reveal">
+                                <span class="inline-block px-3 py-1 bg-sky-100 text-sky-800 text-xs rounded-full mb-3 font-semibold border border-sky-200">
+                                    ${spreadTitles[slotIndex]}
+                                </span>
+                                <h2 class="text-lg font-bold text-slate-800 mb-1.5">${drawnCard.title}</h2>
+                                <p class="text-slate-600 leading-relaxed whitespace-pre-line text-sm font-medium">${drawnCard.meaning}</p>
+                            </div>
+                        `;
+
+                        setTimeout(() => {
+                            const scrollEl = document.getElementById('meanings-container');
+                            scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: 'smooth' });
+                        }, 100);
+
+                        updateNextButtonState();
+                        isAnimating = false;
+                    };
+                }, 800);
+            };
         }
 
         function openModal(imgUrl, index) {
@@ -479,6 +555,10 @@
             if (isInit !== true) {
                 playSound(audioShuffle);
             }
+            isAnimating = false;
+            const existingFlyingCard = document.getElementById('flying-card');
+            if (existingFlyingCard) existingFlyingCard.remove();
+
             availableDeck = [...allCardsData];
             currentSpread = [];
             updateRemainingCount();
