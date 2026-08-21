@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -58,51 +57,41 @@
     <main id="main-scroll" class="flex-grow flex flex-col w-full max-w-3xl py-4 overflow-y-auto relative">
         
         <div id="result-area" class="hidden flex-col items-center w-full justify-start pb-6">
-            <!-- คอนเทนเนอร์แสดง สำรับไพ่ (ซ้าย) และ ช่องเปิดไพ่ (ขวา) -->
             <div id="cards-container" class="flex flex-row justify-center items-center gap-1.5 xs:gap-2 sm:gap-4 mb-6 sticky top-0 bg-[#1a1642]/90 backdrop-blur-md p-2 rounded-2xl z-20 shadow-lg border border-indigo-900/50">
                 
                 <!-- 1. สำรับไพ่ (Deck) -->
                 <div id="deck-display" class="relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] shrink-0 cursor-pointer hover:scale-105 transition-transform" onclick="drawSingleCard()">
-                    <!-- เอฟเฟกต์ไพ่ซ้อนกันด้านหลัง -->
                     <div class="absolute inset-0 bg-gray-800 rounded-xl border border-gray-600 transform translate-x-1.5 translate-y-1.5 z-0"></div>
                     <div class="absolute inset-0 bg-gray-700 rounded-xl border border-gray-500 transform translate-x-0.5 translate-y-0.5 z-0"></div>
                     
-                    <!-- ตัวไพ่ใบบนสุด (ใช้ 37.jpg) -->
+                    <!-- เปลี่ยนเป็น 37.jpg -->
                     <div class="absolute inset-0 rounded-xl overflow-hidden shadow-xl border-[2px] border-indigo-400 z-10">
-                        <img src="37.png" alt="สำรับไพ่" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Deck&font=prompt';">
+                        <img src="37.jpg" alt="สำรับไพ่" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Deck&font=prompt';">
                     </div>
                     
-                    <!-- ป้ายแสดงจำนวนไพ่ -->
                     <div class="absolute -bottom-2 -right-2 bg-indigo-600 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-lg border border-indigo-300 z-20">
                         <span id="deck-count-badge">36</span>
                     </div>
 
-                    <!-- ข้อความ "หมด" (จะโชว์ตอนไพ่หมด) -->
                     <div id="deck-empty-text" class="hidden absolute inset-0 flex items-center justify-center border-[2px] border-dashed border-gray-400 rounded-xl text-white font-medium text-xs xs:text-sm z-30 bg-black/60 backdrop-blur-sm">หมด</div>
                 </div>
 
-                <!-- เส้นกั้น -->
                 <div class="w-px h-16 sm:h-24 bg-indigo-500/30 mx-0.5 sm:mx-1"></div>
 
                 <!-- 2. ช่องว่างสำหรับเปิดไพ่ 3 ใบ -->
                 <div id="spread-slots" class="flex flex-row gap-1.5 xs:gap-2 sm:gap-3">
-                    <!-- Javascript จะสร้างช่องว่างให้ตรงนี้ -->
                 </div>
             </div>
             
-            <!-- ส่วนแสดงความหมาย -->
             <div id="meanings-container" class="w-full flex flex-col gap-4 px-2 mt-2">
-                <!-- ความหมายไพ่แต่ละใบจะเพิ่มเข้ามาเมื่อถูกเปิด -->
             </div>
         </div>
 
-        <!-- หน้าเริ่มแรก (ปุ่มสุ่มใหญ่) -->
         <div id="start-area" class="flex flex-col items-center justify-center h-full my-auto">
             <button id="main-draw-btn" onclick="drawSingleCard()" class="relative w-40 h-60 sm:w-48 sm:h-72 rounded-2xl flex flex-col items-center justify-center transition-all focus:outline-none hover:scale-105 overflow-hidden shadow-2xl border-[3px] border-indigo-400">
-                <!-- พื้นหลังเป็น 37.jpg -->
-                <img src="37.png" class="absolute inset-0 w-full h-full object-cover z-0" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+Back&font=prompt';">
+                <!-- เปลี่ยนเป็น 37.jpg -->
+                <img src="37.jpg" class="absolute inset-0 w-full h-full object-cover z-0" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+Back&font=prompt';">
                 
-                <!-- เลเยอร์สีดำโปร่งแสงสำหรับทำให้อ่านตัวหนังสือชัดขึ้น -->
                 <div class="absolute inset-0 bg-black/50 z-10 flex flex-col items-center justify-center">
                     <div class="text-indigo-200 mb-3 animate-pulse">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,13 +167,13 @@
             resetDeck();
         }
 
-        // จัดการช่องว่างสำหรับ 3 ใบ
         function setupEmptySlots() {
             const slotsContainer = document.getElementById('spread-slots');
             slotsContainer.innerHTML = '';
             for(let i=0; i<3; i++) {
                 slotsContainer.innerHTML += `
                     <div id="slot-${i}" class="relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] rounded-xl shadow-lg border-[2px] border-indigo-900/50 flex items-center justify-center shrink-0 transition-all duration-300 overflow-hidden opacity-70">
+                        <!-- เปลี่ยนเป็น 37.jpg -->
                         <img src="37.jpg" class="absolute inset-0 w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Back&font=prompt';">
                         <div class="absolute inset-0 bg-black/40"></div>
                         <span class="relative z-10 text-white/80 text-xl sm:text-2xl font-bold">${i+1}</span>
@@ -194,17 +183,14 @@
         }
 
         function drawSingleCard() {
-            // ถ้ากดตอนไพ่หมดเกลี้ยง จะไม่ทำอะไร
             if (availableDeck.length === 0 && currentSpread.length === 3) return;
 
-            // ถ้ายกเลิกสำรับ (กดเปิด 3 ใบครบแล้ว) เคลียร์กระดานเพื่อเริ่มชุดใหม่
             if (currentSpread.length === 3) {
                 currentSpread = [];
                 document.getElementById('meanings-container').innerHTML = '';
                 setupEmptySlots();
             }
 
-            // แสดงกระดาน
             const startArea = document.getElementById('start-area');
             if (!startArea.classList.contains('hidden')) {
                 startArea.classList.add('hidden');
@@ -218,13 +204,11 @@
                 document.getElementById('meanings-container').innerHTML = '';
             }
 
-            // สุ่มไพ่ 1 ใบ
             const randomIndex = Math.floor(Math.random() * availableDeck.length);
             const drawnCard = availableDeck.splice(randomIndex, 1)[0];
             const slotIndex = currentSpread.length; 
             currentSpread.push(drawnCard);
 
-            // แทนที่ช่องว่าง
             const slot = document.getElementById(`slot-${slotIndex}`);
             slot.className = `card-reveal relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] rounded-xl overflow-hidden shadow-xl shadow-indigo-900/50 bg-gray-800 border-[2px] border-indigo-400 shrink-0 cursor-pointer hover:scale-105 transition-transform duration-200`;
             
@@ -234,7 +218,6 @@
                      onclick="openModal('${drawnCard.imageUrl}', ${slotIndex+1})">
             `;
 
-            // เพิ่มความหมาย
             const meaningsContainer = document.getElementById('meanings-container');
             meaningsContainer.innerHTML += `
                 <div class="text-left bg-gray-900/80 backdrop-blur-md p-4 rounded-xl border border-gray-700 w-full shadow-lg card-reveal">
@@ -255,7 +238,6 @@
             updateNextButtonState();
         }
 
-        // ฟังก์ชันขยายไพ่ (Modal)
         function openModal(imgUrl, index) {
             const modal = document.getElementById('image-modal');
             const modalImg = document.getElementById('modal-image');
@@ -332,11 +314,9 @@
         function updateRemainingCount() {
             const count = availableDeck.length;
             
-            // อัปเดตตัวเลข
             document.getElementById('cards-remaining').innerText = count;
             document.getElementById('deck-count-badge').innerText = count;
 
-            // จัดการสถานะภาพของสำรับ (Deck)
             const deckDisplay = document.getElementById('deck-display');
             const emptyText = document.getElementById('deck-empty-text');
             
@@ -353,4 +333,4 @@
     </script>
 </body>
 </html>
-```
+```eof
