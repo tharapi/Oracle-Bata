@@ -50,6 +50,16 @@
 </head>
 <body class="flex flex-col items-center justify-between py-6 px-4 h-[100dvh] overflow-hidden">
 
+    <!-- Modal สำหรับแสดงรูปไพ่ขนาดใหญ่ (ซ่อนไว้ก่อน) -->
+    <div id="image-modal" class="fixed inset-0 z-50 hidden bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity opacity-0 duration-300" onclick="if(event.target === this) closeModal()">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 p-2 focus:outline-none bg-gray-900/50 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <img id="modal-image" src="" alt="ไพ่ขยาย" class="max-w-full max-h-[90dvh] rounded-2xl shadow-2xl object-contain scale-95 transition-transform duration-300 border-[3px] border-indigo-400">
+    </div>
+
     <header class="text-center w-full shrink-0 z-10">
         <h1 class="text-2xl md:text-3xl font-semibold mb-1 text-indigo-300 drop-shadow-md">✨ ดูดวงไพ่โอราเคิล ✨</h1>
         <p class="text-gray-300 text-xs md:text-sm">อธิษฐานจิต แล้วแตะเพื่อเปิดไพ่ทีละใบ</p>
@@ -57,14 +67,13 @@
 
     <main id="main-scroll" class="flex-grow flex flex-col w-full max-w-2xl py-4 overflow-y-auto relative">
         
-        <!-- พื้นที่แสดงผล (เมื่อสุ่มแล้ว) -->
         <div id="result-area" class="hidden flex-col items-center w-full justify-start pb-6">
-            <!-- ส่วนแสดงรูปไพ่ (3 ช่อง เรียงแนวนอน) -->
+            <!-- ส่วนแสดงรูปไพ่ -->
             <div id="cards-container" class="flex flex-row justify-center items-center gap-2 sm:gap-4 mb-6 sticky top-0 bg-[#1a1642]/90 backdrop-blur-md p-2 rounded-2xl z-20 shadow-lg border border-indigo-900/50">
                 <!-- ไพ่จะถูกสร้างด้วย Javascript ตรงนี้ -->
             </div>
             
-            <!-- ส่วนแสดงความหมาย (เรียงแนวตั้ง) -->
+            <!-- ส่วนแสดงความหมาย -->
             <div id="meanings-container" class="w-full flex flex-col gap-4 px-2 mt-2">
                 <!-- ความหมายไพ่แต่ละใบจะเพิ่มเข้ามาเมื่อถูกเปิด -->
             </div>
@@ -72,7 +81,7 @@
 
         <!-- หน้าเริ่มแรก (ปุ่มสุ่มใหญ่) -->
         <div id="start-area" class="flex flex-col items-center justify-center h-full my-auto">
-            <button id="main-draw-btn" onclick="drawSingleCard()" class="relative w-40 h-60 sm:w-48 sm:h-72 rounded-2xl card-back-pattern flex flex-col items-center justify-center transition-all focus:outline-none">
+            <button id="main-draw-btn" onclick="drawSingleCard()" class="relative w-40 h-60 sm:w-48 sm:h-72 rounded-2xl card-back-pattern flex flex-col items-center justify-center transition-all focus:outline-none hover:scale-105">
                 <div class="text-indigo-300 mb-3 animate-pulse">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
@@ -85,7 +94,6 @@
     </main>
 
     <footer class="w-full shrink-0 flex flex-col items-center gap-3 pt-2 bg-gradient-to-t from-[#0f0c29] to-transparent z-10">
-        <!-- ปุ่มดำเนินการต่อ จะเปลี่ยนข้อความไปตามจำนวนไพ่ที่เปิด -->
         <button id="next-draw-btn" onclick="drawSingleCard()" class="hidden w-full max-w-[300px] py-3 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl text-white font-medium shadow-lg transition-colors focus:outline-none text-base">
             ✨ เปิดไพ่ใบที่ 1 ✨
         </button>
@@ -102,7 +110,7 @@
         const TOTAL_CARDS = 36;
         let allCardsData = [];
         let availableDeck = [];
-        let currentSpread = []; // เก็บไพ่ที่สุ่มได้ในชุดปัจจุบัน (0 ถึง 3 ใบ)
+        let currentSpread = [];
         const spreadTitles = ['ใบที่ 1 (อดีต / ต้นเหตุ)', 'ใบที่ 2 (ปัจจุบัน / สถานการณ์)', 'ใบที่ 3 (อนาคต / บทสรุป)'];
 
         function initializeDeck() {
@@ -147,7 +155,6 @@
             resetDeck();
         }
 
-        // ฟังก์ชันเตรียมช่องว่าง 3 ช่อง (ไพ่คว่ำ)
         function setupEmptySlots() {
             const cardsContainer = document.getElementById('cards-container');
             cardsContainer.innerHTML = '';
@@ -161,14 +168,12 @@
         }
 
         function drawSingleCard() {
-            // ถ้ายกเลิกสำรับ (กดเปิด 3 ใบครบแล้ว) ให้เคลียร์กระดานเพื่อเริ่มชุดใหม่
             if (currentSpread.length === 3) {
                 currentSpread = [];
                 document.getElementById('meanings-container').innerHTML = '';
                 setupEmptySlots();
             }
 
-            // ถ้าเป็นการสุ่มครั้งแรกของหน้าแรก ให้สลับหน้าจอมาที่กระดาน
             const startArea = document.getElementById('start-area');
             if (!startArea.classList.contains('hidden')) {
                 startArea.classList.add('hidden');
@@ -182,22 +187,21 @@
                 document.getElementById('meanings-container').innerHTML = '';
             }
 
-            // สุ่มไพ่ 1 ใบ
             const randomIndex = Math.floor(Math.random() * availableDeck.length);
             const drawnCard = availableDeck.splice(randomIndex, 1)[0];
-            
-            const slotIndex = currentSpread.length; // ค่าจะเป็น 0 (ซ้าย), 1 (กลาง), หรือ 2 (ขวา)
+            const slotIndex = currentSpread.length; 
             currentSpread.push(drawnCard);
 
-            // แทนที่ช่องว่างด้วยไพ่ที่สุ่มได้ พร้อมอนิเมชันเปิดไพ่
             const slot = document.getElementById(`slot-${slotIndex}`);
-            slot.className = `card-reveal w-[90px] h-[135px] xs:w-28 xs:h-40 sm:w-36 sm:h-52 rounded-xl overflow-hidden shadow-xl shadow-indigo-900/50 bg-gray-800 border-[2px] border-indigo-400 shrink-0`;
+            slot.className = `card-reveal w-[90px] h-[135px] xs:w-28 xs:h-40 sm:w-36 sm:h-52 rounded-xl overflow-hidden shadow-xl shadow-indigo-900/50 bg-gray-800 border-[2px] border-indigo-400 shrink-0 cursor-pointer hover:scale-105 transition-transform duration-200`;
+            
+            // เพิ่ม onclick เพื่อเรียกฟังก์ชันซูมรูปภาพ (openModal)
             slot.innerHTML = `
                 <img src="${drawnCard.imageUrl}" alt="ไพ่ ${slotIndex+1}" class="w-full h-full object-cover" 
-                     onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+${slotIndex+1}&font=prompt';">
+                     onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+${slotIndex+1}&font=prompt';"
+                     onclick="openModal('${drawnCard.imageUrl}', ${slotIndex+1})">
             `;
 
-            // เพิ่มกล่องความหมายด้านล่าง
             const meaningsContainer = document.getElementById('meanings-container');
             meaningsContainer.innerHTML += `
                 <div class="text-left bg-gray-900/80 backdrop-blur-md p-4 rounded-xl border border-gray-700 w-full shadow-lg card-reveal">
@@ -209,7 +213,6 @@
                 </div>
             `;
 
-            // เลื่อนหน้าจอลงไปที่ความหมายล่าสุดอัตโนมัติ
             setTimeout(() => {
                 const mainEl = document.getElementById('main-scroll');
                 mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' });
@@ -219,13 +222,46 @@
             updateNextButtonState();
         }
 
+        // --- ฟังก์ชันสำหรับการซูมรูปภาพ (Modal) ---
+        function openModal(imgUrl, index) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            
+            modalImg.src = imgUrl;
+            modalImg.onerror = function() {
+                this.onerror = null;
+                this.src = `https://placehold.co/600x900/1e1b4b/e0e7ff?text=Card+${index}+Not+Found&font=prompt`;
+            };
+
+            modal.classList.remove('hidden');
+            // เพื่อให้เกิดอนิเมชัน fade-in และ zoom-in
+            void modal.offsetWidth; 
+            modal.classList.remove('opacity-0');
+            modalImg.classList.remove('scale-95');
+            modalImg.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            
+            modal.classList.add('opacity-0');
+            modalImg.classList.remove('scale-100');
+            modalImg.classList.add('scale-95');
+            
+            // รอให้อนิเมชันจบแล้วค่อยซ่อน element (ประมาณ 300ms ตามที่กำหนดใน class)
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+        // ----------------------------------------
+
         function updateNextButtonState() {
             const btn = document.getElementById('next-draw-btn');
             btn.classList.remove('hidden');
             
             const baseBtnClass = "w-full max-w-[300px] py-3 rounded-xl text-white font-medium shadow-lg transition-colors focus:outline-none text-base ";
 
-            // เช็คกรณีไพ่หมดสำรับ
             if (availableDeck.length === 0) {
                 btn.innerText = "↺ ไพ่หมดสำรับ (เริ่มใหม่ทั้งหมด)";
                 btn.className = baseBtnClass + "bg-gray-700 hover:bg-gray-600 active:bg-gray-800 border border-gray-500";
@@ -233,7 +269,6 @@
                 return;
             }
 
-            // ถ้าไพ่ยังไม่หมด ให้เรียกฟังก์ชันเปิดไพ่ใบต่อไป
             btn.onclick = drawSingleCard;
 
             if (currentSpread.length === 1) {
@@ -253,14 +288,12 @@
             currentSpread = [];
             updateRemainingCount();
             
-            // ปิดพื้นที่แสดงผล กลับไปหน้าเริ่ม
             document.getElementById('result-area').classList.add('hidden');
             document.getElementById('result-area').classList.remove('flex');
             
             document.getElementById('start-area').classList.remove('hidden');
             document.getElementById('start-area').classList.add('flex');
             
-            // รีเซ็ตปุ่ม
             const btn = document.getElementById('next-draw-btn');
             btn.classList.add('hidden');
             btn.onclick = drawSingleCard; 
