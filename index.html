@@ -64,7 +64,6 @@
                     <div class="absolute inset-0 bg-gray-800 rounded-xl border border-gray-600 transform translate-x-1.5 translate-y-1.5 z-0"></div>
                     <div class="absolute inset-0 bg-gray-700 rounded-xl border border-gray-500 transform translate-x-0.5 translate-y-0.5 z-0"></div>
                     
-                    <!-- เปลี่ยนเป็น 37.jpg -->
                     <div class="absolute inset-0 rounded-xl overflow-hidden shadow-xl border-[2px] border-indigo-400 z-10">
                         <img src="37.jpg" alt="สำรับไพ่" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Deck&font=prompt';">
                     </div>
@@ -88,19 +87,20 @@
         </div>
 
         <div id="start-area" class="flex flex-col items-center justify-center h-full my-auto">
-            <button id="main-draw-btn" onclick="drawSingleCard()" class="relative w-40 h-60 sm:w-48 sm:h-72 rounded-2xl flex flex-col items-center justify-center transition-all focus:outline-none hover:scale-105 overflow-hidden shadow-2xl border-[3px] border-indigo-400">
-                <!-- เปลี่ยนเป็น 37.jpg -->
-                <img src="37.jpg" class="absolute inset-0 w-full h-full object-cover z-0" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+Back&font=prompt';">
+            <!-- ปรับโครงสร้างปุ่มหน้าแรกใหม่ให้ข้อความอยู่ด้านล่าง -->
+            <button id="main-draw-btn" onclick="drawSingleCard()" class="flex flex-col items-center justify-center transition-all focus:outline-none group">
                 
-                <div class="absolute inset-0 bg-black/50 z-10 flex flex-col items-center justify-center">
-                    <div class="text-indigo-200 mb-3 animate-pulse">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </div>
-                    <span class="font-medium tracking-wider text-lg text-white">เริ่มเปิดไพ่</span>
-                    <span class="text-xs text-indigo-300 mt-1">(สุ่ม 3 ใบ)</span>
+                <!-- ตัวไพ่ -->
+                <div class="relative w-40 h-60 sm:w-48 sm:h-72 rounded-2xl overflow-hidden shadow-2xl border-[3px] border-indigo-400 group-hover:scale-105 transition-transform duration-300">
+                    <img src="37.jpg" class="absolute inset-0 w-full h-full object-cover z-0" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+Back&font=prompt';">
                 </div>
+                
+                <!-- ข้อความด้านล่างไพ่ -->
+                <div class="mt-6 flex flex-col items-center">
+                    <span class="font-medium tracking-wider text-xl text-white drop-shadow-md">เริ่มเปิดไพ่</span>
+                    <span class="text-sm text-indigo-300 mt-1">(สุ่ม 3 ใบ)</span>
+                </div>
+
             </button>
         </div>
     </main>
@@ -173,7 +173,6 @@
             for(let i=0; i<3; i++) {
                 slotsContainer.innerHTML += `
                     <div id="slot-${i}" class="relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] rounded-xl shadow-lg border-[2px] border-indigo-900/50 flex items-center justify-center shrink-0 transition-all duration-300 overflow-hidden opacity-70">
-                        <!-- เปลี่ยนเป็น 37.jpg -->
                         <img src="37.jpg" class="absolute inset-0 w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Back&font=prompt';">
                         <div class="absolute inset-0 bg-black/40"></div>
                         <span class="relative z-10 text-white/80 text-xl sm:text-2xl font-bold">${i+1}</span>
@@ -333,4 +332,3 @@
     </script>
 </body>
 </html>
-```eof
