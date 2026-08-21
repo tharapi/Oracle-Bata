@@ -134,6 +134,17 @@
     </footer>
 
     <script>
+        const audioEnter = new Audio('เสียง​เข้าหน้าเว๊บ.m4a');
+        const audioDraw = new Audio('เสียงเปิดไพ่.m4a');
+        const audioEnlarge = new Audio('เสียง​ขยายไพ่.m4a');
+        const audioClose = new Audio('เสียง​ปิดไพ่.m4a');
+        const audioShuffle = new Audio('เสียงสับไพ่.m4a');
+
+        function playSound(audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log('Audio play blocked/failed:', e));
+        }
+
         const TOTAL_CARDS = 36;
         let allCardsData = [];
         let availableDeck = [];
@@ -141,6 +152,7 @@
         const spreadTitles = ['ใบที่ 1 (อดีต / ต้นเหตุ)', 'ใบที่ 2 (ปัจจุบัน / สถานการณ์)', 'ใบที่ 3 (อนาคต / บทสรุป)'];
 
         function initializeDeck() {
+            playSound(audioEnter);
             allCardsData = [
                 { id: 1, imageUrl: '1.png', title: '1. พระสงฆ์ (The Monk)', meaning: 'การปล่อยวาง (Letting Go)\nความสงบ, สติ, การไม่ยึดติด' },
                 { id: 2, imageUrl: '2.png', title: '2. ไอ้แดง (Red Ranger)', meaning: 'ความเป็นผู้นำ (Leadership)\nการปกป้อง, ความรับผิดชอบ, หัวขบวน' },
@@ -179,7 +191,7 @@
                 { id: 35, imageUrl: '35.png', title: '35. ผู้คุมกฎ (The Enforcer)', meaning: 'วินัยและอำนาจ (Discipline & Authority)\nบทเรียนที่เข้มงวด, ความคาดหวัง, ผู้หวังดีในเงามืด' },
                 { id: 36, imageUrl: '36.png', title: '36. ยมทูต (The Grim Reaper)', meaning: 'การสิ้นสุด (Transformation)\nการเริ่มต้นใหม่, การปล่อยวางสิ่งเก่า, การเปลี่ยนผ่าน' }
             ];
-            resetDeck();
+            resetDeck(true);
         }
 
         function setupEmptySlots() {
@@ -196,6 +208,8 @@
 
         function drawSingleCard() {
             if (availableDeck.length === 0 && currentSpread.length === 3) return;
+
+            playSound(audioDraw);
 
             if (currentSpread.length === 3) {
                 currentSpread = [];
@@ -251,6 +265,7 @@
         }
 
         function openModal(imgUrl, index) {
+            playSound(audioEnlarge);
             const modal = document.getElementById('image-modal');
             const modalImg = document.getElementById('modal-image');
             
@@ -268,6 +283,7 @@
         }
 
         function closeModal() {
+            playSound(audioClose);
             const modal = document.getElementById('image-modal');
             const modalImg = document.getElementById('modal-image');
             
@@ -307,7 +323,10 @@
             }
         }
 
-        function resetDeck() {
+        function resetDeck(isInit) {
+            if (isInit !== true) {
+                playSound(audioShuffle);
+            }
             availableDeck = [...allCardsData];
             currentSpread = [];
             updateRemainingCount();
