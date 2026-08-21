@@ -98,12 +98,12 @@
                 { id: 2, imageUrl: '2.png', title: '2. ไอ้แดง (Red Ranger)', meaning: 'ความเป็นผู้นำ (Leadership)\nการปกป้อง, ความรับผิดชอบ, หัวขบวน' },
                 { id: 3, imageUrl: '3.png', title: '3. สายรุ้ง (Rainbow)', meaning: 'ความคิดสร้างสรรค์ (Creativity)\nความหลากหลาย, การกล้าแตกต่าง, การปฏิวัติสิ่งเดิม' },
                 { id: 4, imageUrl: '4.png', title: '4. นายจัน (Nai Chan)', meaning: 'การยืนหยัด (Resilience)\nความเด็ดเดี่ยว, ความกล้าหาญ, การปกป้องจุดยืน' },
-                { id: 5, imageUrl: '4.png', title: '5. ราชา (The King)', meaning: 'ความมั่นใจ (Confidence)\nความโดดเด่น, การกล้าแสดงออก, อัตตา' },
+                { id: 5, imageUrl: '5.png', title: '5. ราชา (The King)', meaning: 'ความมั่นใจ (Confidence)\nความโดดเด่น, การกล้าแสดงออก, อัตตา' },
                 { id: 6, imageUrl: '6.png', title: '6. เทพสามตา (God)', meaning: 'ญาณหยั่งรู้ (Intuition)\nความศรัทธา, วิสัยทัศน์, ปัญญา' },
                 { id: 7, imageUrl: '7.png', title: '7. น้องความทุกข์ (Sorrow)', meaning: 'ด้านมืดในใจ (The Shadow)\nการเผชิญหน้า, บททดสอบ, การยอมรับความจริง' },
                 { id: 8, imageUrl: '8.png', title: '8. เพื่อนตาย (Best Friend)', meaning: 'มิตรภาพ (Companionship)\nการสนับสนุน, พันธมิตร, ความภักดี' },
-                { id: 9, imageUrl: '9.png', title: '9. แม่เหล็ก (The Magnet)', meaning: 'แม่เหล็ก (The Magnet)\nพรหมลิขิต, จังหวะที่ใช่, ความเชื่อมโยง' },
-                { id: 10, imageUrl: '10.png', title: '10. กำแพงใจ (The Wall)', meaning: 'กำแพงใจ (The Wall)\nความขัดแย้ง, ทิฐิ, การหันหลังให้กัน' }
+                { id: 9, imageUrl: '9.png', title: '9. แม่เหล็ก (The Magnet)', meaning: 'พรหมลิขิต (Destiny)\nพรหมลิขิต, จังหวะที่ใช่, ความเชื่อมโยง' },
+                { id: 10, imageUrl: '10.png', title: '10. กำแพงใจ (The Wall)', meaning: 'ความขัดแย้ง (Conflict)\nความขัดแย้ง, ทิฐิ, การหันหลังให้กัน' },
                 { id: 11, imageUrl: '11.png', title: '11. พลูโต (Pluto)', meaning: 'ระยะห่าง (Space)\nการแยกย้าย, การพักทบทวน, กาลเวลา' },
                 { id: 12, imageUrl: '12.png', title: '12. ปกป้อง (Protect)', meaning: 'พื้นที่ปลอดภัย (Safe Haven)\nการปกป้อง, ความอบอุ่น, ความอุ่นใจ' },
                 { id: 13, imageUrl: '13.png', title: '13. ครอบครัว (The Family)', meaning: 'รากฐาน (Foundation)\nครอบครัว, ความปลอดภัย, พรแห่งชีวิต' },
@@ -130,17 +130,8 @@
                 { id: 34, imageUrl: '34.png', title: '34. เกษตรกร (The Farmer)', meaning: 'การอุทิศตน (Devotion)\nความเสียสละ, ผู้หล่อเลี้ยง, การสร้างรากฐาน' },
                 { id: 35, imageUrl: '35.png', title: '35. ผู้คุมกฎ (The Enforcer)', meaning: 'วินัยและอำนาจ (Discipline & Authority)\nบทเรียนที่เข้มงวด, ความคาดหวัง, ผู้หวังดีในเงามืด' },
                 { id: 36, imageUrl: '36.png', title: '36. ยมทูต (The Grim Reaper)', meaning: 'การสิ้นสุด (Transformation)\nการเริ่มต้นใหม่, การปล่อยวางสิ่งเก่า, การเปลี่ยนผ่าน' }
-
             ];
             
-            for (let i = 11; i <= TOTAL_CARDS; i++) {
-                allCardsData.push({
-                    id: i,
-                    imageUrl: `https://placehold.co/300x450/1e1b4b/e0e7ff?text=${i}&font=montserrat`,
-                    title: `ไพ่ใบที่ ${i}`,
-                    meaning: `ความหมายของไพ่ใบที่ ${i} (รอเพิ่มข้อมูล)`
-                });
-            }
             resetDeck();
         }
 
