@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="theme-color" content="#e0f2fe">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <title>ดูดวงไพ่โอราเคิล</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Prompt', sans-serif;
+            /* เปลี่ยนพื้นหลังเป็นโทนเย็นสว่าง (Light / Cool tones) */
+            background: linear-gradient(135deg, #e0f2fe, #f0f9ff, #bae6fd);
+            color: #1e293b; /* เปลี่ยนสีข้อความหลักเป็นสีเข้ม */
+            min-height: 100dvh; 
+            overflow-x: hidden;
+        }
+        .card-container { perspective: 1000px; }
+        @keyframes drawCardAnim {
+            0% { transform: translateY(30px) scale(0.9) rotateY(90deg); opacity: 0; }
+            50% { transform: translateY(-5px) scale(1.02) rotateY(0deg); opacity: 1; }
+            100% { transform: translateY(0) scale(1) rotateY(0deg); opacity: 1; }
+        }
+        .card-reveal { animation: drawCardAnim 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .whitespace-pre-line { white-space: pre-line; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
+        
+        /* สไตล์สำหรับผืนผ้าปูไพ่ */
+        .card-mat {
+            background-image: url('ดาวน์โหลด.webp');
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(0,0,0,0.5);
+            /* ขอบสีทองหม่นๆ ให้เข้ากับลายบนผ้า */
+            border: 2px solid rgba(212, 175, 55, 0.4); 
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between py-6 px-4 h-[100dvh] overflow-hidden">
+
+    <!-- Modal สำหรับแสดงรูปไพ่ขนาดใหญ่ -->
+    <div id="image-modal" class="fixed inset-0 z-50 hidden bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity opacity-0 duration-300" onclick="if(event.target === this) closeModal()">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 p-2 focus:outline-none bg-gray-900/50 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <img id="modal-image" src="" alt="ไพ่ขยาย" class="max-w-full max-h-[90dvh] rounded-2xl shadow-2xl object-contain scale-95 transition-transform duration-300 border-[3px] border-indigo-400">
+    </div>
+
+    <header class="text-center w-full shrink-0 z-10">
+        <h1 class="text-2xl md:text-3xl font-bold mb-1 text-indigo-900 drop-shadow-sm">✨ ดูดวงไพ่โอราเคิล ✨</h1>
+        <p class="text-slate-600 text-xs md:text-sm font-medium">อธิษฐานจิต แล้วแตะเพื่อเปิดไพ่ทีละใบ</p>
+    </header>
+
+    <main id="main-scroll" class="flex-grow flex flex-col w-full max-w-3xl py-4 overflow-y-auto relative">
+        
+        <div id="result-area" class="hidden flex-col items-center w-full justify-start pb-6">
+            
+            <!-- พื้นที่สำหรับวางไพ่ (Mat) -->
+            <div id="cards-container" class="card-mat flex flex-row justify-center items-center gap-2 xs:gap-3 sm:gap-6 mb-6 sticky top-0 p-4 sm:p-6 rounded-2xl z-20 w-full max-w-[500px]">
+                
+                <!-- เลเยอร์สีดำบางๆ เคลือบภาพพื้นหลังไม่ให้แย่งซีนไพ่ -->
+                <div class="absolute inset-0 bg-black/20 rounded-xl pointer-events-none"></div>
+
+                <!-- 1. สำรับไพ่ (Deck) -->
+                <div id="deck-display" class="relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] shrink-0 cursor-pointer hover:scale-105 transition-transform z-10" onclick="drawSingleCard()">
+                    <div class="absolute inset-0 bg-gray-900 rounded-xl border border-gray-700 transform translate-x-1.5 translate-y-1.5 z-0 shadow-md"></div>
+                    <div class="absolute inset-0 bg-gray-800 rounded-xl border border-gray-600 transform translate-x-0.5 translate-y-0.5 z-0 shadow-md"></div>
+                    
+                    <div class="absolute inset-0 rounded-xl overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.5)] border-[2px] border-indigo-300 z-10">
+                        <img src="37.jpg" alt="สำรับไพ่" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Deck&font=prompt';">
+                    </div>
+                    
+                    <div class="absolute -bottom-2 -right-2 bg-indigo-600 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-lg border border-indigo-200 z-20">
+                        <span id="deck-count-badge">36</span>
+                    </div>
+
+                    <div id="deck-empty-text" class="hidden absolute inset-0 flex items-center justify-center border-[2px] border-dashed border-gray-300 rounded-xl text-white font-medium text-xs xs:text-sm z-30 bg-black/60 backdrop-blur-sm">หมด</div>
+                </div>
+
+                <div class="w-px h-16 sm:h-24 bg-white/20 mx-0.5 sm:mx-1 z-10"></div>
+
+                <!-- 2. ช่องว่างสำหรับเปิดไพ่ 3 ใบ -->
+                <div id="spread-slots" class="flex flex-row gap-1.5 xs:gap-2 sm:gap-3 z-10">
+                </div>
+            </div>
+            
+            <div id="meanings-container" class="w-full flex flex-col gap-4 px-2 mt-2">
+            </div>
+        </div>
+
+        <div id="start-area" class="flex flex-col items-center justify-center h-full my-auto">
+            <button id="main-draw-btn" onclick="drawSingleCard()" class="flex flex-col items-center justify-center transition-all focus:outline-none group">
+                
+                <!-- ตัวไพ่ -->
+                <div class="relative w-40 h-60 sm:w-48 sm:h-72 rounded-2xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.2)] border-[3px] border-indigo-300 group-hover:scale-105 group-hover:-translate-y-2 transition-all duration-300 bg-white">
+                    <img src="37.jpg" class="absolute inset-0 w-full h-full object-cover z-0" onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+Back&font=prompt';">
+                </div>
+                
+                <!-- ข้อความด้านล่างไพ่ -->
+                <div class="mt-6 flex flex-col items-center">
+                    <span class="font-bold tracking-wider text-xl text-indigo-950 drop-shadow-sm">เริ่มเปิดไพ่</span>
+                    <span class="text-sm text-indigo-600 mt-1 font-medium">(สุ่ม 3 ใบ)</span>
+                </div>
+
+            </button>
+        </div>
+    </main>
+
+    <footer class="w-full shrink-0 flex flex-col items-center gap-3 pt-4 pb-2 bg-gradient-to-t from-sky-100 to-transparent z-10">
+        <button id="next-draw-btn" onclick="drawSingleCard()" class="hidden w-full max-w-[300px] py-3.5 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl text-white font-semibold shadow-lg shadow-indigo-200 transition-colors focus:outline-none text-base">
+            ✨ เปิดไพ่ใบที่ 1 ✨
+        </button>
+
+        <div class="flex items-center justify-between w-full max-w-[300px] text-xs sm:text-sm bg-white/70 backdrop-blur-sm p-2 rounded-full px-4 border border-sky-200 shadow-sm">
+            <p class="text-slate-600 font-medium">ไพ่ในสำรับ: <span id="cards-remaining" class="text-indigo-700 font-bold text-base">36</span></p>
+            <button onclick="resetDeck()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 rounded-full font-medium transition-colors text-slate-700 focus:outline-none">
+                ↺ เริ่มใหม่ทั้งหมด
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        const TOTAL_CARDS = 36;
+        let allCardsData = [];
+        let availableDeck = [];
+        let currentSpread = [];
+        const spreadTitles = ['ใบที่ 1 (อดีต / ต้นเหตุ)', 'ใบที่ 2 (ปัจจุบัน / สถานการณ์)', 'ใบที่ 3 (อนาคต / บทสรุป)'];
+
+        function initializeDeck() {
+            allCardsData = [
+                { id: 1, imageUrl: '1.png', title: '1. พระสงฆ์ (The Monk)', meaning: 'การปล่อยวาง (Letting Go)\nความสงบ, สติ, การไม่ยึดติด' },
+                { id: 2, imageUrl: '2.png', title: '2. ไอ้แดง (Red Ranger)', meaning: 'ความเป็นผู้นำ (Leadership)\nการปกป้อง, ความรับผิดชอบ, หัวขบวน' },
+                { id: 3, imageUrl: '3.png', title: '3. สายรุ้ง (Rainbow)', meaning: 'ความคิดสร้างสรรค์ (Creativity)\nความหลากหลาย, การกล้าแตกต่าง, การปฏิวัติสิ่งเดิม' },
+                { id: 4, imageUrl: '4.png', title: '4. นายจัน (Nai Chan)', meaning: 'การยืนหยัด (Resilience)\nความเด็ดเดี่ยว, ความกล้าหาญ, การปกป้องจุดยืน' },
+                { id: 5, imageUrl: '5.png', title: '5. ราชา (The King)', meaning: 'ความมั่นใจ (Confidence)\nความโดดเด่น, การกล้าแสดงออก, อัตตา' },
+                { id: 6, imageUrl: '6.png', title: '6. เทพสามตา (God)', meaning: 'ญาณหยั่งรู้ (Intuition)\nความศรัทธา, วิสัยทัศน์, ปัญญา' },
+                { id: 7, imageUrl: '7.png', title: '7. น้องความทุกข์ (Sorrow)', meaning: 'ด้านมืดในใจ (The Shadow)\nการเผชิญหน้า, บททดสอบ, การยอมรับความจริง' },
+                { id: 8, imageUrl: '8.png', title: '8. เพื่อนตาย (Best Friend)', meaning: 'มิตรภาพ (Companionship)\nการสนับสนุน, พันธมิตร, ความภักดี' },
+                { id: 9, imageUrl: '9.png', title: '9. แม่เหล็ก (The Magnet)', meaning: 'พรหมลิขิต (Destiny)\nพรหมลิขิต, จังหวะที่ใช่, ความเชื่อมโยง' },
+                { id: 10, imageUrl: '10.png', title: '10. กำแพงใจ (The Wall)', meaning: 'ความขัดแย้ง (Conflict)\nความขัดแย้ง, ทิฐิ, การหันหลังให้กัน' },
+                { id: 11, imageUrl: '11.png', title: '11. พลูโต (Pluto)', meaning: 'ระยะห่าง (Space)\nการแยกย้าย, การพักทบทวน, กาลเวลา' },
+                { id: 12, imageUrl: '12.png', title: '12. ปกป้อง (Protect)', meaning: 'พื้นที่ปลอดภัย (Safe Haven)\nการปกป้อง, ความอบอุ่น, ความอุ่นใจ' },
+                { id: 13, imageUrl: '13.png', title: '13. ครอบครัว (The Family)', meaning: 'รากฐาน (Foundation)\nครอบครัว, ความปลอดภัย, พรแห่งชีวิต' },
+                { id: 14, imageUrl: '14.png', title: '14. ต้นไม้ (The Tree Man)', meaning: 'การเติบโต (Growth)\nการบ่มเพาะ, ความอดทน, กาลเวลา' },
+                { id: 15, imageUrl: '15.png', title: '15. โจรสลัด (The Pirate)', meaning: 'อิสระเสรี (Freedom)\nการผจญภัย, การทำตามใจ, นอกกรอบ' },
+                { id: 16, imageUrl: '16.png', title: '16. บัณฑิต (The Scholar)', meaning: 'ความสำเร็จ (Achievement)\nกัลยาณมิตร, ปัญญา, สังคมที่ดี' },
+                { id: 17, imageUrl: '17.png', title: '17. เงือก (The Merfolk)', meaning: 'ความเท่าเทียม (Equality)\nการยอมรับ, ความยุติธรรม, การทลายอคติ' },
+                { id: 18, imageUrl: '18.png', title: '18. โรบินฮู้ด (Robin Hood)', meaning: 'ความแม่นยำ (Focus)\nผู้ช่วยเหลือ, ไหวพริบ, การแบ่งปัน' },
+                { id: 19, imageUrl: '19.png', title: '19. สปีด (Speed)', meaning: 'ไหวพริบ (Agility)\nจังหวะเวลา, ความรวดเร็ว, โอกาสเฉียบพลัน' },
+                { id: 20, imageUrl: '20.png', title: '20. มืด (Blind)', meaning: 'ความหวาดระแวง (Paranoia)\nความไม่รู้, ความคลุมเครือ, ความสับสน' },
+                { id: 21, imageUrl: '21.png', title: '21. ลัง (The Box)', meaning: 'ร่องรอยบาดแผล (Scars)\nอดีตฝังใจ, ความทรงจำ, รอยแผลชีวิต' },
+                { id: 22, imageUrl: '22.png', title: '22. จอยบอย (Controller)', meaning: 'การควบคุม (Control)\nทางเลือก, เกมชีวิต, ความเรียบง่าย' },
+                { id: 23, imageUrl: '23.png', title: '23. อมยิ้ม (The Lollipop)', meaning: 'ความไร้เดียงสา (Innocence)\nความสุขเล็กๆ, วัยเยาว์, การมองโลกแง่ดี' },
+                { id: 24, imageUrl: '24.png', title: '24. มิจ (The Scammer)', meaning: 'ภาพลวงตา (Illusion)\nการหลอกลวง, หน้ากาก, การหักหลัง' },
+                { id: 25, imageUrl: '25.png', title: '25. มนุษย์ยาง (Rubber Man)', meaning: 'ข้อจำกัด (Restriction)\nความอึดอัด, ความตึงเครียด, การถูกตีกรอบ' },
+                { id: 26, imageUrl: '26.png', title: '26. หมวกเหล็ก (Helmet)', meaning: 'ความดื้อรั้น (Stubbornness)\nการปิดกั้น, อคติ, อีโก้' },
+                { id: 27, imageUrl: '27.png', title: '27. สลัค (Half-Orc)', meaning: 'การไตร่ตรอง (Contemplation)\nสติปัญญา, ความช้าที่ชัวร์, คุณค่าภายใน' },
+                { id: 28, imageUrl: '28.png', title: '28. Gemini (AI)', meaning: 'ตรรกะและเหตุผล (Logic & Reason)\nความจริงแท้, ความเป็นกลาง, การไร้อารมณ์' },
+                { id: 29, imageUrl: '29.png', title: '29. ปึ๊ด (Resilience)', meaning: 'การฟื้นคืนพลัง (The Survivor)\nทรหด, มีสไตล์, ไม่ลืมตัว' },
+                { id: 30, imageUrl: '30.png', title: '30. ลูกเสือ (The Scout)', meaning: 'สัจจะ (Integrity)\nเกียรติยศ, คำมั่นสัญญา, ความซื่อสัตย์' },
+                { id: 31, imageUrl: '31.png', title: '31. นักวิจัย (The Researcher)', meaning: 'การหมกมุ่น (Obsession)\nการค้นหาความจริง, ความมุ่งมั่น, การวิเคราะห์' },
+                { id: 32, imageUrl: '32.png', title: '32. โซค (The Scuba Diver)', meaning: 'การดำดิ่ง (Deep Exploration)\nโลกเฉพาะตัว, ความหลงใหล, คุณค่าที่ซ่อนอยู่' },
+                { id: 33, imageUrl: '33.png', title: '33. นินจา (The Ninja)', meaning: 'ผู้ปิดทองหลังพระ (Unseen Duty)\nความลับ, การทำตามหน้าที่, การอยู่อย่างถ่อมตน' },
+                { id: 34, imageUrl: '34.png', title: '34. เกษตรกร (The Farmer)', meaning: 'การอุทิศตน (Devotion)\nความเสียสละ, ผู้หล่อเลี้ยง, การสร้างรากฐาน' },
+                { id: 35, imageUrl: '35.png', title: '35. ผู้คุมกฎ (The Enforcer)', meaning: 'วินัยและอำนาจ (Discipline & Authority)\nบทเรียนที่เข้มงวด, ความคาดหวัง, ผู้หวังดีในเงามืด' },
+                { id: 36, imageUrl: '36.png', title: '36. ยมทูต (The Grim Reaper)', meaning: 'การสิ้นสุด (Transformation)\nการเริ่มต้นใหม่, การปล่อยวางสิ่งเก่า, การเปลี่ยนผ่าน' }
+            ];
+            resetDeck();
+        }
+
+        function setupEmptySlots() {
+            const slotsContainer = document.getElementById('spread-slots');
+            slotsContainer.innerHTML = '';
+            for(let i=0; i<3; i++) {
+                slotsContainer.innerHTML += `
+                    <div id="slot-${i}" class="relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] rounded-xl shadow-[0_4px_10px_rgba(0,0,0,0.5)] border-[2px] border-[#d4af37]/40 flex items-center justify-center shrink-0 transition-all duration-300 overflow-hidden backdrop-blur-sm bg-black/30">
+                        <span class="relative z-10 text-white/70 text-xl sm:text-2xl font-bold">${i+1}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function drawSingleCard() {
+            if (availableDeck.length === 0 && currentSpread.length === 3) return;
+
+            if (currentSpread.length === 3) {
+                currentSpread = [];
+                document.getElementById('meanings-container').innerHTML = '';
+                setupEmptySlots();
+            }
+
+            const startArea = document.getElementById('start-area');
+            if (!startArea.classList.contains('hidden')) {
+                startArea.classList.add('hidden');
+                startArea.classList.remove('flex');
+                
+                const resultArea = document.getElementById('result-area');
+                resultArea.classList.remove('hidden');
+                resultArea.classList.add('flex');
+                
+                setupEmptySlots();
+                document.getElementById('meanings-container').innerHTML = '';
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableDeck.length);
+            const drawnCard = availableDeck.splice(randomIndex, 1)[0];
+            const slotIndex = currentSpread.length; 
+            currentSpread.push(drawnCard);
+
+            const slot = document.getElementById(`slot-${slotIndex}`);
+            slot.className = `card-reveal relative w-[65px] h-[100px] xs:w-[80px] xs:h-[120px] sm:w-[100px] sm:h-[150px] rounded-xl overflow-hidden shadow-[0_5px_15px_rgba(0,0,0,0.6)] bg-gray-800 border-[2px] border-indigo-200 shrink-0 cursor-pointer hover:scale-105 hover:-translate-y-1 transition-all duration-200`;
+            
+            slot.innerHTML = `
+                <img src="${drawnCard.imageUrl}" alt="ไพ่ ${slotIndex+1}" class="w-full h-full object-cover" 
+                     onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Card+${slotIndex+1}&font=prompt';"
+                     onclick="openModal('${drawnCard.imageUrl}', ${slotIndex+1})">
+            `;
+
+            const meaningsContainer = document.getElementById('meanings-container');
+            meaningsContainer.innerHTML += `
+                <div class="text-left bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-sky-100 w-full shadow-lg shadow-sky-900/5 card-reveal">
+                    <span class="inline-block px-3 py-1 bg-sky-100 text-sky-800 text-xs rounded-full mb-3 font-semibold border border-sky-200">
+                        ${spreadTitles[slotIndex]}
+                    </span>
+                    <h2 class="text-lg font-bold text-slate-800 mb-1.5">${drawnCard.title}</h2>
+                    <p class="text-slate-600 leading-relaxed whitespace-pre-line text-sm font-medium">${drawnCard.meaning}</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const mainEl = document.getElementById('main-scroll');
+                mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' });
+            }, 100);
+
+            updateRemainingCount();
+            updateNextButtonState();
+        }
+
+        function openModal(imgUrl, index) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            
+            modalImg.src = imgUrl;
+            modalImg.onerror = function() {
+                this.onerror = null;
+                this.src = `https://placehold.co/600x900/1e1b4b/e0e7ff?text=Card+${index}+Not+Found&font=prompt`;
+            };
+
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; 
+            modal.classList.remove('opacity-0');
+            modalImg.classList.remove('scale-95');
+            modalImg.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            
+            modal.classList.add('opacity-0');
+            modalImg.classList.remove('scale-100');
+            modalImg.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function updateNextButtonState() {
+            const btn = document.getElementById('next-draw-btn');
+            btn.classList.remove('hidden');
+            
+            const baseBtnClass = "w-full max-w-[300px] py-3.5 rounded-xl text-white font-semibold shadow-lg transition-colors focus:outline-none text-base ";
+
+            if (availableDeck.length === 0 && currentSpread.length === 3) {
+                btn.innerText = "↺ ไพ่หมดสำรับ (เริ่มใหม่ทั้งหมด)";
+                btn.className = baseBtnClass + "bg-slate-700 hover:bg-slate-600 active:bg-slate-800 shadow-slate-300";
+                btn.onclick = resetDeck;
+                return;
+            }
+
+            btn.onclick = drawSingleCard;
+
+            if (currentSpread.length === 1) {
+                btn.innerText = "✨ เปิดไพ่ใบที่ 2 (ปัจจุบัน) ✨";
+                btn.className = baseBtnClass + "bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 shadow-indigo-200";
+            } else if (currentSpread.length === 2) {
+                btn.innerText = "✨ เปิดไพ่ใบที่ 3 (อนาคต) ✨";
+                btn.className = baseBtnClass + "bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 shadow-indigo-200";
+            } else if (currentSpread.length === 3) {
+                btn.innerText = "✨ เริ่มสุ่มชุดต่อไป (เคลียร์กระดาน) ✨";
+                btn.className = baseBtnClass + "bg-sky-600 hover:bg-sky-500 active:bg-sky-700 shadow-sky-200";
+            }
+        }
+
+        function resetDeck() {
+            availableDeck = [...allCardsData];
+            currentSpread = [];
+            updateRemainingCount();
+            
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('flex');
+            
+            document.getElementById('start-area').classList.remove('hidden');
+            document.getElementById('start-area').classList.add('flex');
+            
+            const btn = document.getElementById('next-draw-btn');
+            btn.classList.add('hidden');
+            btn.onclick = drawSingleCard; 
+        }
+
+        function updateRemainingCount() {
+            const count = availableDeck.length;
+            
+            document.getElementById('cards-remaining').innerText = count;
+            document.getElementById('deck-count-badge').innerText = count;
+
+            const deckDisplay = document.getElementById('deck-display');
+            const emptyText = document.getElementById('deck-empty-text');
+            
+            if (count === 0) {
+                deckDisplay.classList.add('pointer-events-none');
+                emptyText.classList.remove('hidden');
+            } else {
+                deckDisplay.classList.remove('pointer-events-none');
+                emptyText.classList.add('hidden');
+            }
+        }
+
+        window.onload = () => { initializeDeck(); };
+    </script>
+</body>
+</html>
