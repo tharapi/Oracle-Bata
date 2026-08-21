@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -51,10 +52,11 @@
     </header>
 
     <main class="flex-grow flex flex-col justify-center items-center w-full max-w-sm py-4">
+        <!-- ลบ class flex ออกก่อน เพื่อให้ hidden ทำงานได้ตอนเริ่มต้น -->
         <div id="result-area" class="hidden flex-col items-center w-full card-container h-full justify-center">
             <div id="card-display" class="w-48 h-[280px] sm:w-56 sm:h-[320px] rounded-2xl overflow-hidden shadow-2xl shadow-indigo-900/60 mb-4 bg-gray-800 border-[3px] border-indigo-400 shrink-0">
-                <img id="card-image" src="" alt="ไพ่" class="w-full h-full object-cover" 
-                     onerror="this.onerror=null; this.src='https://placehold.co/300x450/1e1b4b/e0e7ff?text=Image+Not+Found&font=prompt';">
+                <!-- เอา onerror ออกจาก HTML แล้วไปจัดการใน Javascript แทน -->
+                <img id="card-image" src="" alt="ไพ่" class="w-full h-full object-cover">
             </div>
             <div id="card-info" class="text-center bg-gray-900/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-gray-700 w-full shadow-lg">
                 <h2 id="card-title" class="text-xl sm:text-2xl font-medium text-indigo-300 mb-2">ชื่อไพ่</h2>
@@ -139,7 +141,11 @@
             if (availableDeck.length === 0) {
                 document.getElementById('card-title').innerText = "ไพ่หมดสำรับแล้ว";
                 document.getElementById('card-meaning').innerText = "กรุณากดปุ่ม 'เริ่มใหม่' เพื่อสับไพ่";
-                document.getElementById('card-image').src = "https://placehold.co/300x450/3f3f46/ffffff?text=End";
+                
+                const imgEl = document.getElementById('card-image');
+                imgEl.onerror = null;
+                imgEl.src = "https://placehold.co/300x450/3f3f46/ffffff?text=End";
+                
                 document.getElementById('next-draw-btn').classList.add('hidden');
                 return;
             }
@@ -150,10 +156,15 @@
         }
 
         function displayCard(card) {
-            document.getElementById('start-area').classList.add('hidden');
+            // [แก้ไข] สลับ class ให้ถูกต้อง ป้องกัน hidden กับ flex ชนกัน
+            const startArea = document.getElementById('start-area');
+            startArea.classList.add('hidden');
+            startArea.classList.remove('flex');
+
             const resultArea = document.getElementById('result-area');
             resultArea.classList.remove('hidden');
             resultArea.classList.add('flex');
+            
             document.getElementById('next-draw-btn').classList.remove('hidden');
 
             const cardDisplay = document.getElementById('card-display');
@@ -161,7 +172,15 @@
             void cardDisplay.offsetWidth;
             cardDisplay.classList.add('card-reveal');
 
-            document.getElementById('card-image').src = card.imageUrl;
+            // [แก้ไข] ตั้งค่า onerror ใหม่ทุกครั้งที่สุ่มไพ่
+            const imgEl = document.getElementById('card-image');
+            imgEl.onerror = function() {
+                this.onerror = null; // ป้องกันการโหลดซ้ำไม่รู้จบ
+                this.src = 'https://placehold.co/300x450/1e1b4b/e0e7ff?text=Image+Not+Found&font=prompt';
+            };
+            // เปลี่ยนรูปภาพ
+            imgEl.src = card.imageUrl;
+            
             document.getElementById('card-title').innerText = card.title;
             document.getElementById('card-meaning').innerText = card.meaning;
         }
@@ -169,9 +188,16 @@
         function resetDeck() {
             availableDeck = [...allCardsData];
             updateRemainingCount();
-            document.getElementById('result-area').classList.add('hidden');
-            document.getElementById('result-area').classList.remove('flex');
-            document.getElementById('start-area').classList.remove('hidden');
+            
+            // [แก้ไข] สลับ class ให้ถูกต้อง ตอนกลับไปหน้าเริ่มแรก
+            const resultArea = document.getElementById('result-area');
+            resultArea.classList.add('hidden');
+            resultArea.classList.remove('flex');
+            
+            const startArea = document.getElementById('start-area');
+            startArea.classList.remove('hidden');
+            startArea.classList.add('flex');
+            
             document.getElementById('next-draw-btn').classList.add('hidden');
         }
 
